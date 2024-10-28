@@ -1,5 +1,16 @@
 \chapter{L'Architettura di GeneroCity}
+
+L'app di Generocity può essere divisa in due componenti principali tra loro interconnessi:  il Frontend, ossia la componente software  con cui l'utente interagisce, ed il Backend, il quale si occupa della vera e propria elaborazione.
 \section{Backend}
 \section{Frontend}
-\subsection{Android}
-\subsection{iOS}
+\subsection{Le interazioni implicite}
+\begin{quote}
+"Implicit Human Computer Interaction
+Implicit human computer interaction is an action,
+performed by the user that is not primarily aimed
+to interact with a computerized system but which
+such a system understands as input."\cite{implicit-interaction}
+\end{quote}
+Una delle caratteristiche principali di entrambe le applicazioni è l'utilizzo di interazioni implicite. Con questo termine si intende un tipo di interazione uomo-macchina che non richiede dei comandi espliciti da parte dell'utente, piuttosto viene utilizzato il contesto in cui quest'ultimo si trova come input per l'elaborazione. Un esempio molto semplice di interazione implicita può essere come alcuni veicoli accendono le luci anabbaglianti quando diventa buio senza che l'autista debba farlo manualmente, o come le porte dei supermercati si aprono automaticamente quando un cliente cammina in contro ad esse senza la necessità di abbassare una maniglia. 
+
+Questo tipo di approccio è fondamentale per garantire la sicurezza degli utenti finali che utilizzeranno l'applicazione durante la guida, pertanto è necessario limitare al minimo il compimento di azioni che comportano l'utilizzo diretto dello smartphone. Un obbiettivo chiave di questo progetto è quindi riconoscere come l'utente si sta spostando in un momento specifico per determinare quali sono le sue intenzioni, ad esempio se sta cercando un parcheggio o ne sta lasciando uno, senza che debba essere lui ad indicarlo esplicitamente attraverso un'interfaccia grafica.

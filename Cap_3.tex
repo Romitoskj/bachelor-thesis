@@ -1,7 +1,28 @@
-\chapter{I Sensori e il loro utilizzo per le Interazioni Implicite}
-\section{Cos'è un interazione implicita}
-\subsection{Come le otteniamo: sensori}
-\section{Lo scopo dei sensori (confidenza)}
-\section{Il flusso di aggiornamento della confidenza}
+\chapter{I Sensori e il loro utilizzo per ottenere Interazioni Implicite}
+Come detto in precedenza una delle funzionalità principali dell'applicazione è riconoscere come l'utente si sta spostando in un determinato momento. In questa fase dello sviluppo ci siamo concentrati nello specifico nel dedurre se un'utente si trova alla guida o meno. Di seguito si spiegherà come questo scopo è stato raggiunto attraverso il lavoro coordinato di vari sensori.
+\section{I sensori}
+In GeneroCity un sensore è un modulo software che analizza il contesto in cui si trova l'utente in uno specifico istante per determinare l'azione compiuta da quest'ultimo. In particolare ciascuno di essi calcola un valore reale compreso tra 0 e 1, detto \textbf{confidenza}, il quale rappresenta il grado di sicurezza con il quale il sensore ha effettuato la rilevazione (dove 0 rappresenta una sicurezza minima e 1 massima). Dato che nella versione attuale dell'applicazione l'azione che viene rilevata solamente una, possiamo approssimare la confidenza come la probabilità che l'utente stia guidando dove:
+\begin{itemize}
+    \item un valore compreso tra 0 e 0,5 (stato \textit{walking}) indica che l'utente non sta guidando;
+    \item il valore 0,5 (stato \textit{unknown}) denota che il sensore non è in grado di inferire lo stato dell'utente;
+    \item una confidenza compresa tra 0,5 e 1 (stato \textit{automotive}) segnala che l'utente sta guidando.
+\end{itemize}
+
+Per analizzare il contesto e calcolare la confidenza ogni sensore si può basare sulle rilevazioni di un vero e proprio sensore (come quelli di movimento o ambientali), sullo stato di una specifica componente del dispositivo, ad esempio la batteria, oppure può utilizzare la connettività (ad esempio Wi-Fi o Bluetooth) o altre tecnologie e protocolli specifici, come la geolocalizzazione attraverso GPS. Una linea guida importante per lo sviluppo di un sensore è che esso faccia uso una sola di queste tecnologie per effettuare la sua computazione, in modo che siano tutti indipendenti tra di loro, di modo che sarà poi l'insieme dei risultati ottenuti da tutti i sensori in uno specifico lasso di tempo a concorrere al calcolo della confidenza finale. Questo valore sarà poi quello che effettivamente indicherà se l'utente sta guidando o meno.
+
+\section{Il flusso di aggiornamento della confidenza in GeneroCity Android}
+
 \subsection{L'interfaccia Sensor}
 \subsection{L'invio di dati al server}
+\subsection{Il compito del sensore Bluetooth}
+L'obbiettivo del mio tirocinio: sviluppare un sensore per capire se l'utente sta guidando basandosi sui dispositivi connessi al bluetooth
+Scelta di implementarlo prima in un progetto separato, motivazioni:
+\begin{itemize}
+    \item prendere dimestichezza con l'SDK di Android
+    \item imparare ad utilizzare le API di Android per la connettività via bluetooth per
+    \begin{itemize}
+        \item rilevare l'accensione e lo spegnimento del bluetooth stesso
+        \item ottenere i dati dei dispositivi connessi
+        \item effettuare scansioni per trovare dispositivi vicini
+    \end{itemize}
+\end{itemize}
