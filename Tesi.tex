@@ -7,7 +7,7 @@
 %Qui tutto ciò che c’ è da saper su LaTeX: http://www.lorenzopantieri.net/LaTeX_files/ArteLaTeX.pdf 
 %Per scrivere la bibliografia puoi vedere il seguente link: https://www.guitex.org/home/images/doc/GuideGuIT/bibliografia.pdf
 
-\documentclass[a4paper, oneside]{sapthesis}
+\documentclass[a4paper, oneside, noexaminfo]{sapthesis}
 
 %qui ci sono svariati pacchetti utili per far funzionare il programma
 \usepackage{microtype}
@@ -23,10 +23,14 @@
 \usepackage[table]{xcolor}
 \usepackage{hyperref}
 \usepackage{blindtext}
-\usepackage{listings}
+
 \usepackage{minted}
 \usepackage{pgfplots}
+\pgfplotsset{compat=1.7}
 \usepackage{wrapfig}
+
+\usepackage{xcolor}
+\definecolor{LightGray}{gray}{0.9}
 
 \usepackage[linguistics]{forest} %per dare i diagrammi: https://texdoc.org/serve/forest/0
 
@@ -46,7 +50,7 @@
 \setcitestyle{super,open={(},close={)}}
 
 \hypersetup{pdftitle={Romito_1932500}, pdfauthor={Romito_1932500}}
-\title{Implementazione di un sensore Bluetooth per l’App GeneroCity  Android}
+\title{Sviluppo di un sistema per rilevare spostamenti in auto tramite il Bluetooth degli smartphone}
 \author{Antonio Pietro Romito}
 \IDnumber{1932500}
 \course{Corso di Laurea in Informatica}
@@ -62,13 +66,6 @@
 \copyyear{2024}
 \thesistype{Relazione di tirocinio}
 \examdate{V Sessione A.A. 2023-2024 | Dicembre 2024}
-\examiner{Prof. Emanuele Panizzi} 
-% \examiner{Prof. Caio} 
-% \examiner{Prof. Sempronio}  
-% \examiner{Prof. ...}  
-% \examiner{Prof. ...} 
-% \examiner{Prof. ...}  
-% \examiner{Prof. ...} 
 
 %In caso di titoli di section a 2 righe
 %\setlength{\headheight}{22.59052pt}
@@ -83,10 +80,7 @@
 \begin{document}
 \frontmatter
 \maketitle
-\dedication{A Piffy che si è addormentato qui accanto. \\
-A Pepo che ha riempito la tastiera di peli. \\
-A Millo che ha morso i cavi.
-}
+\dedication{Dedica}
 
 \input{abstract}
 \tableofcontents
@@ -99,7 +93,6 @@ A Millo che ha morso i cavi.
 \include{Cap_3}
 \include{Cap_4}
 \include{Cap_5}
-\include{Cap_6}
 
 \backmatter
 \cleardoublepage
@@ -114,6 +107,6 @@ A Millo che ha morso i cavi.
 \addcontentsline{toc}{chapter}{\bibname}
 \bibliography{bibiografia}
 
-\input{ringraziamenti}
+% \input{ringraziamenti}
 
 \end{document}

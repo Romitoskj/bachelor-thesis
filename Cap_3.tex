@@ -1,30 +1,46 @@
-\chapter{I Sensori e il loro utilizzo per ottenere Interazioni Implicite}
+\chapter{GeneroCity}
 
-Come detto in precedenza una delle funzionalità principali dell'applicazione è riconoscere come l'utente si sta spostando in un determinato momento e, in questa fase dello sviluppo, ci siamo concentrati nel costruire un sistema che deducesse in modo autonomo se un'utente si trova alla guida o meno. Di seguito si spiegherà come questo scopo è stato raggiunto attraverso il lavoro coordinato di vari sensori.
+In questo capitolo verrà descritta l'applicazione di GeneroCity e in particolar modo come i sensori operano in essa. Verrà prima delineata la sua architettura generale per poi approfondire i dettagli implementativi riguardanti l'integrazione dei sensori nell'applicazione per Android. 
+
+\section{L'architettura dell'applicazione}
+L'applicazione di Generocity è basata su un'architettura di tipo client-server\footnote{Il sistema client-server è un'architettura di rete dove un dispositivo terminale o client si connette ad un server per usufruire di un servizio.} ed è quindi divisa in due componenti principali tra loro interconnesse: il \textit{backend} e il \textit{frontend}. Queste due componenti comunicano tra di loro utilizzando il protocollo HTTP\footnote{HTTP, acronimo di HyperText Transfer Protocol, è il principale protocollo di livello applicativo usato per il trasferimento di dati sul web.}.
+
+\subsection{Backend}
+Il backend è il software che si occupa dell'effettiva elaborazione dei dati e di gestire il database al fine di immagazzinarli e accedere ad essi. Esso espone delle funzionalità attraverso una web API\footnote{Una API, acronimo di Application Software Interface, è un tipo di interfaccia software che permette ad un programma di offrire servizi e funzionalità ad altri software.}, definendo come le altre componenti software devono interagire con il server senza la necessità di condividere codice sorgente ma effettuando delle richieste HTTP a degli specifici URL chiamati endpoint.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{images/rest.png}
+    \caption{Comunicazione tramite API REST}
+    \label{fig:rest}
+\end{figure}
+In particolare il backend di GeneroCity adotta una filosofia REST, la quale definisce una serie di principi chiave per la progettazione progettazione di una API.
 
 
-\section{I sensori}
-In GeneroCity un sensore è un modulo software\footnote{La programmazione modulare è un paradigma di programmazione che consiste nella realizzazione di programmi suddivisi in moduli, ognuno dei quali svolge precise funzioni.} che analizza il contesto in cui si trova l'utente in uno specifico istante per determinare l'azione compiuta da quest'ultimo. In particolare ciascuno di essi calcola un valore reale compreso tra 0 e 1, detto \textbf{confidenza}, il quale rappresenta il grado di sicurezza con il quale il sensore ha effettuato la rilevazione del'azione (dove 0 rappresenta una sicurezza minima e 1 massima). Poiché nella versione attuale dell'applicazione l'azione che viene rilevata è solamente una, possiamo approssimare la confidenza come la probabilità che l'utente stia guidando. Più specificamente:
-\begin{itemize}
-    \item un valore compreso tra 0 e 0,5 (stato \textit{walking}) indica che l'utente non sta guidando;
-    \item il valore 0,5 (stato \textit{unknown}) denota che il sensore non è in grado di inferire lo stato dell'utente;
-    \item una confidenza compresa tra 0,5 e 1 (stato \textit{automotive}) segnala che l'utente sta guidando.
-\end{itemize}
+\subsection{Frontend}
+Il frontend invece è il programma con cui l'utente finale interagisce direttamente, in questo caso attraverso un'interfaccia grafica. Questa componente invierà le richieste agli endpoint definiti dal backend per inviare e ottenere dei dati. Esistono due versioni
+\begin{wrapfigure}[23]{r}{0.4\textwidth}
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/gc_main_activity.png}
+    \caption{GeneroCity Android}
+    \label{fig:main_screen}
+\end{wrapfigure}
+differenti del frontend di Generocity: un'applicazione per Android scritta in Java e una in Swift per iOS. Si è scelto di sviluppare due applicazioni in maniera nativa anziché utilizzare un approccio cross-platform\footnote{Con cross-platform si intende un'applicazione che viene sviluppata una sola volta con un unico codice sorgente, ma può essere eseguita su diversi sistemi operativi. Si differisce dall'approccio il quale prevede l'utilizzo di un linguaggio di programmazione specifico per la piattaforma utilizzata.} a causa dell'estensivo utilizzo di funzionalità di sistema che verrà fatto dai sensori.
 
-Per analizzare il contesto e calcolare la confidenza ogni sensore può adottare svariati approcci: esso si può basare sulle rilevazioni di un vero e proprio sensore (come quelli di movimento o ambientali), sullo stato di una specifica componente del dispositivo, ad esempio la batteria o il display, oppure può far uso della connettività Wi-Fi, Bluetooth o utilizzare altre tecnologie e protocolli specifici, come la geolocalizzazione attraverso GPS. Una linea guida importante per lo sviluppo di un sensore è che esso si avvalga una sola di queste tecnologie o componenti in modo da effettuare la computazione in maniera indipendente dagli altri: ad esempio non succederà mai che il sensore Bluetooth effettui una scansione dei dispositivi vicini quando il GPS rileva che l'utente si sta muovendo ad una certa velocità. Questo perché sarà l'insieme dei risultati ottenuti da tutti i sensori a concorrere al calcolo dell'effettivo stato dell'utente ed eventuali correlazioni tra sensori differenti verranno prese in considerazione dal sistema durante questa computazione tramite apprendimento automatico.
+La loro gestione, infatti,  avviene interamente nel frontend e richiede che il loro funzionamento sia ben coordinato per garantire che lo stato dell'utente sia continuamente aggiornato. Di seguito verranno analizzati i dettagli implementativi riguardanti questo aggiornamento.
 
 
-\section{Il flusso di aggiornamento della confidenza in GeneroCity Android}
-Dato che i sensori sono molteplici un fattore importante è la loro coordinazione: lo stato dell'utente sarà determinato basandosi sulla confidenza di ogni sensore ed è quindi importante che esso sia aggiornato ogni qualvolta un sensore cambia la sua confidenza. Per sincronizzare il lavoro dei sensori è stato quindi fondamentale definire delle funzionalità comuni che ogni sensore deve avere. Questo è stato possibile sfruttando il paradigma di programmazione orientata agli oggetti implementato in Java\cite{ref:Java}, in particolare è stata definita una classe astratta\footnote{Nella programmazione orientata agli oggetti una classe astratta è una classe che non può essere istanziata, la quale definisce delle funzionalità di base per tutte le sue sotto classi.} che tutti i sensori ereditano.
+\section{Il flusso di aggiornamento della confidenza dei sensori}
+Dato che in GeneroCity i sensori presenti sono molteplici, un fattore importante è la loro coordinazione: lo stato dell'utente sarà determinato basandosi sulla confidenza di ogni sensore ed è quindi importante che esso sia aggiornato ogni qualvolta un sensore cambia la sua confidenza. Per sincronizzare il lavoro dei sensori è stato quindi fondamentale definire delle funzionalità comuni che ogni sensore deve avere. Questo è stato possibile sfruttando il paradigma di programmazione orientata agli oggetti implementato in Java, in particolare è stata definita una classe astratta\footnote{Nella programmazione orientata agli oggetti una classe astratta è una classe che non può essere istanziata, la quale definisce delle funzionalità di base per tutte le sue sotto classi.} che tutti i sensori ereditano.
 
 \subsection{La classe astratta Sensor}
 Ogni sensore eredita dalla classe Sensor i seguenti attributi: il \textit{nome} univoco che identifica il sensore, la \textit{versione} del sensore, il \textit{peso} (rappresentato come numero reale) che ha il sensore nel calcolo dello stato dell'utente.
 
-Inoltre ogni sensore mantiene uno storico della confidenza che ha calcolato tramite una mappa ad albero\footnote{Una treemap è una struttura dati che implementa le funzionalità di normale una normale mappa, ossia immagazzina delle coppie (chiave, valore), e inoltre mantiene l'ordinamento delle coppie basato sull'ordinamento naturale delle chiavi.} che adotta come chiave lo Unix Timestamp\footnote{Lo Unix Timestamp rappresenta il numero di secondi trascorsi dalla mezzanotte del 1° Gennaio 1970.} del momento in cui il valore è stato calcolato. Di seguito vengono riportati i principali metodi esposti da questa classe.
+Inoltre ogni sensore mantiene uno storico della confidenza che ha calcolato tramite una mappa ad albero\footnote{Una treemap è una struttura dati che implementa le funzionalità di normale una normale mappa, ossia immagazzina delle coppie (chiave, valore), e inoltre mantiene l'ordinamento delle coppie basato sull'ordinamento naturale delle chiavi.} che adotta come chiave lo Unix Timestamp, ossia il numero di secondi trascorsi dalla mezzanotte del 1° Gennaio 1970, che indica il momento in cui il valore è stato calcolato. Di seguito vengono riportati i principali metodi esposti da questa classe.
 \subsubsection{getStatus}
 \begin{minted}[
 framesep=2mm,
 linenos,
+bgcolor=LightGray,
 breaklines
 ]{java}
 public abstract double getStatus(Calendar timestamp);
@@ -35,6 +51,7 @@ Esso ha come parametro un Timestamp e restituisce la confidenza del sensore calc
 \begin{minted}[
 framesep=2mm,
 linenos,
+bgcolor=LightGray,
 breaklines
 ]{java}
 public void update(Calendar timestamp, SensorData sensorData) {
@@ -49,7 +66,8 @@ Quando viene eseguito il metodo update viene notificata l'unità centrale: una c
 \begin{minted}[
 framesep=2mm,
 linenos,
-breaklines
+breaklines,
+bgcolor=LightGray,
 ]{java}
 static void onUpdate(Calendar time) {
     if (updating) {
@@ -67,6 +85,7 @@ static void onUpdate(Calendar time) {
 \begin{minted}[
 framesep=2mm,
 linenos,
+bgcolor=LightGray,
 breaklines
 ]{java}
 private static double compute(Calendar time) {
@@ -99,6 +118,7 @@ Come anticipato ogni qualvolta viene aggiornata la confidenza di un sensore il m
 \begin{minted}[
 framesep=2mm,
 linenos,
+bgcolor=LightGray,
 breaklines
 ]{java}
 public void collect(Calendar timestamp, SensorData sensorData) {
@@ -123,6 +143,7 @@ Di seguito un esempio di body inviato dal sensore bluetooth attraverso una richi
 \begin{minted}[
 framesep=2mm,
 linenos,
+bgcolor=LightGray,
 breaklines
 ]{json}
 {
@@ -148,8 +169,3 @@ Come si può notare il campo data è costruito sulla base dello stato del sensor
 In aggiunta a questi dati nel path della richiesta (figura \ref{fig:endpoint}) vengono anche mandati il nome del sensore utilizzato ed una chiave univoca usata per identificare la richiesta nel database. Essa è costruita utilizzando la versione del sensore, l'id dell'utente autenticato nell'applicazione ed il Timestamp del momento in cui viene inviata la richiesta.
 
 Inoltre, onde evitare un sovraccarico del server, è stato definito un tempo di \textit{cooldown} tra le richieste: ogni volta che viene notificato un aggiornamento da parte del sensore, se questo tempo non è trascorso dall'ultima richiesta, allora la richiesta viene scartata ma viene comunque ricalcolata la nuova media.
-
-\section{Il compito del sensore Bluetooth}
-La quasi totalità delle automobili prodotte al giorno d'oggi hanno installata un'autoradio dotata di tecnologie bluetooth, dando la possibilità ai guidatori di riprodurre musica, effettuare chiamate o utilizzare software come Android Auto o Apple Car Play per sfruttare alcune funzionalità dello smartphone durante la guida.\cite{ref:car-bluetooth} L'obiettivo del mio tirocinio è stato aggiungere al sistema precedentemente descritto un sensore bluetooth in grado di capire se l'utente sta conducendo un veicolo. Esso dovrà restituire un valore di confidenza adeguato calcolato sulla base dei dispositivi connessi allo smartphone di quest'ultimo tramite la medesima tecnologia.
-
-Prima di integrare questa nuova funzionalità in GeneroCity si è scelto di sviluppare una piccola applicazione a sé stante allo scopo di prendere dimestichezza con l'SDK\footnote{Acronimo che sta per Software Development Kit, ossia un'insieme di strumenti per lo sviluppo del software} di Android per Java, nello specifico con le sue funzionalità riguardanti la connettività via bluetooth.

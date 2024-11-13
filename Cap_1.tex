@@ -1,24 +1,49 @@
-\chapter{Introduzione: GeneroCity, un'Applicazione di SmartParking}
+\chapter{Introduzione}
 
-La crescente urbanizzazione e l'aumento del numero di veicoli in circolazione hanno reso la questione della mobilità urbana e della sosta un tema centrale per il futuro delle città. 
-Le statistiche presentate dall'Osservatorio AIPARK\footnote{AIPARK - Associazione Italiana Operatori Sosta e Mobilità} nel giugno di quest'anno rivelano una situazione allarmante: l'Italia è al vertice della classifica europea per numero di autovetture, con un rapporto di 690 auto ogni 1.000 abitanti.Questa realtà comporta che circa il 30\% del traffico urbano sia generato da veicoli in cerca di parcheggio, evidenziando un disallineamento tra la domanda di sosta e l'offerta disponibile. Per correggere questo squilibrio è stato calcolato che sarebbe necessario aggiungere 670.000 posti auto, di cui oltre 200 mila solamente a Roma, dove, ad oggi, se ne conta uno ogni 39 residenti.\cite{ref:AIPARK}
+% La crescente urbanizzazione e l'aumento del numero di veicoli in circolazione hanno reso la questione della mobilità urbana e della sosta un tema centrale per il futuro delle città. 
+% Le statistiche presentate dall'Osservatorio AIPARK\footnote{AIPARK - Associazione Italiana Operatori Sosta e Mobilità} nel giugno di quest'anno rivelano una situazione allarmante: l'Italia è al vertice della classifica europea per numero di autovetture, con un rapporto di 690 auto ogni 1.000 abitanti. Questa realtà comporta che circa il 30\% del traffico urbano sia generato da veicoli in cerca di parcheggio, evidenziando un disallineamento tra la domanda di sosta e l'offerta disponibile. Per correggere questo squilibrio è stato calcolato che sarebbe necessario aggiungere 670.000 posti auto, di cui oltre 200 mila solamente a Roma, dove, ad oggi, se ne conta uno ogni 39 residenti.\cite{ref:AIPARK}
 
-Una possibile soluzione a questi problemi è lo \textbf{smart parking}, ossia una strategia che utilizza tecnologie digitali nel tentativo di utilizzare il minor numero di risorse possibili (carburante, tempo, spazio) per ottenere un processo di sosta dei veicoli più veloce, facile e ottimizzato.\cite{ref:smartparking}
+% Una possibile soluzione a questi problemi è lo \textbf{smart parking}, ossia una strategia che utilizza tecnologie digitali nel tentativo di utilizzare il minor numero di risorse possibili (carburante, tempo, spazio) per ottenere un processo di sosta dei veicoli più veloce, facile e ottimizzato.\cite{ref:smartparking}
+% \section{GeneroCity e il suo scopo}
+% In questa realtà nasce GeneroCity: un’applicazione di smart parking in sviluppo per Android e iOS realizzata dal Gamification Lab del Dipartimento di Informatica della Sapienza Università di Roma. Lo scopo dell'applicazione è quello di facilitare lo scambio dei parcheggi all’interno di un’area urbana puntando sulla generosità degli utenti\cite{ref:generocity}: la sua idea principale è quella di rilevare quando un utente esce da un parcheggio e segnalarlo agli utenti che ne stanno cercando uno nella stessa zona. Inoltre sono presenti i \textit{GCoins}, ossia una moneta virtuale che gli utenti guadagnano cedendo il loro posto ad altri e possono spendere per prenotarne uno. 
+% 
+% Essi rappresentano una componente di gamification\footnote{La gamification è l'utilizzo di elementi mutuati dai giochi e delle tecniche di creazione di giochi in contesti non ludici.} con lo scopo di motivare e coinvolgere gli utenti ad utilizzare l'applicazione.
+
+% La vera innovazione introdotta da questo progetto però, è il numero limitato di interazioni che l'utente dovrà avere con essa: l'applicazione cercherà di prevedere automaticamente quando quest'ultimo lascia o cerca un parcheggio, ciò in modo da garantire una maggiore sicurezza alla guida. Il mio ruolo nello sviluppo di GeneroCity è stato quello di utilizzare le funzionalità bluetooth degli smartphone Android per raggiungere tale scopo.
+\textit{GeneroCity} è un'applicazione di smart parking\footnote{lo smart parking è una strategia che utilizza tecnologie digitali nel tentativo di utilizzare il minor numero di risorse possibili (carburante, tempo, spazio) per ottenere un processo di sosta dei veicoli più veloce, facile e ottimizzato.\cite{ref:smartparking}}, in sviluppo per Android e iOS, realizzata dal Gamification Lab del Dipartimento di Informatica della Sapienza Università di Roma. Lo scopo dell'applicazione è quello di facilitare il parcheggio all’interno di un’area urbana\cite{ref:generocity}.
 
 \begin{figure}[h]
     \centering
+    \vspace*{1\baselineskip}
     \includegraphics[width=0.5\linewidth]{images/gc_logo.png}
     \caption{Logo di GeneroCity}
     \label{fig:gc_logo}
 \end{figure}
-\section{GeneroCity e il suo scopo}
-In questa realtà nasce GeneroCity: un’applicazione di smart parking in sviluppo per Android e iOS realizzata dal Gamification Lab del Dipartimento di Informatica della Sapienza Università di Roma. Lo scopo dell'applicazione è quello di facilitare lo scambio dei parcheggi all’interno di un’area urbana puntando sulla generosità degli utenti\cite{ref:generocity}: la sua idea principale è quella di rilevare quando un utente esce da un parcheggio e segnalarlo agli utenti che ne stanno cercando uno nella stessa zona. Inoltre sono presenti i \textit{GCoins}, ossia una moneta virtuale che gli utenti guadagnano cedendo il loro posto ad altri e possono spendere per prenotarne uno. 
-\begin{wrapfigure}{r}{0.5\textwidth}
-    \centering
-    \includegraphics[width=0.9\linewidth]{images/gc_main_activity.png}
-    \caption{GeneroCity Android}
-    \label{fig:main_screen}
-\end{wrapfigure}
-Essi rappresentano una componente di gamification\footnote{La gamification è l'utilizzo di elementi mutuati dai giochi e delle tecniche di creazione di giochi in contesti non ludici.} con lo scopo di motivare e coinvolgere gli utenti ad utilizzare l'applicazione.
 
-La vera innovazione introdotta da questo progetto però, è il numero limitato di interazioni che l'utente dovrà avere con essa: l'applicazione cercherà di prevedere automaticamente quando quest'ultimo lascia o cerca un parcheggio, ciò in modo da garantire una maggiore sicurezza alla guida. Il mio ruolo nello sviluppo di GeneroCity è stato quello di utilizzare le funzionalità bluetooth degli smartphone Android per raggiungere tale scopo.
+Il mio contributo a questo progetto è stato quello di realizzare un modulo software che, analizzando i dati forniti dalla radio Bluetooth degli smartphone Android, rilevi automaticamente quando l'utente è alla guida della propria auto. Di seguito si spiegherà come questo scopo viene raggiunto attraverso il lavoro coordinato di vari \textbf{sensori}, tra cui quello Bluetooth da me realizzato.
+
+\section{I sensori e il loro utilizzo per ottenere interazioni implicite}
+Una delle caratteristiche principali dell'applicazione è l'utilizzo di interazioni implicite.
+\begin{quote}
+\textbf{Implicit human computer interaction} is an action,
+performed by the user that is not primarily aimed
+to interact with a computerized system but which
+such a system understands as input.\cite{ref:implicit-interaction}
+\end{quote}
+Con questo termine si intende un tipo di interazione uomo-macchina che non richiede dei comandi espliciti da parte dell'utente, piuttosto viene utilizzato il contesto in cui quest'ultimo agisce come input per l'elaborazione\cite{ref:implicit-interaction-2}. Questo tipo di approccio è fondamentale per garantire la sicurezza degli utenti finali che utilizzeranno l'applicazione durante la guida. Le interazioni implicite vengono ottenute grazie all'implementazione di moduli chiamati sensori.
+
+\paragraph{I sensori}
+In GeneroCity un sensore è un modulo software che analizza il contesto in cui si trova l'utente in uno specifico istante per determinare l'azione compiuta da quest'ultimo. In particolare ciascuno di essi calcola un valore reale compreso tra 0 e 1, detto \textbf{confidenza}, il quale rappresenta il grado di sicurezza con con cui il sensore ha effettuato la rilevazione dell'azione di guida (dove 0 rappresenta una sicurezza minima e 1 massima). Più specificamente:
+\begin{itemize}
+    \item un valore compreso tra 0 e 0,5 (stato \textit{walking}) indica che l'utente non sta guidando;
+    \item il valore 0,5 (stato \textit{unknown}) denota che il sensore non è in grado di inferire lo stato dell'utente;
+    \item una confidenza compresa tra 0,5 e 1 (stato \textit{automotive}) segnala che l'utente sta guidando.
+\end{itemize}
+
+Per analizzare il contesto e calcolare la confidenza ogni sensore può adottare svariati approcci: esso si può basare sulle rilevazioni di un vero e proprio sensore hardware presente nello smartphone (come quelli di movimento o ambientali), sullo stato di una specifica componente del dispositivo, ad esempio la batteria o il display, oppure può far uso della connettività Wi-Fi, Bluetooth o utilizzare altre tecnologie e protocolli specifici, come la geolocalizzazione attraverso GPS. Lo stato effettivo dell'utente sarà poi determinato analizzando il risultato ottenuto da tutti i sensori in un preciso istante di tempo.
+
+Una linea guida importante per lo sviluppo di un sensore è che esso si avvalga una sola di queste tecnologie o componenti in modo da effettuare la computazione in maniera indipendente dagli altri: ad esempio non succederà mai che il sensore Bluetooth effettui una scansione dei dispositivi vicini quando il GPS rileva che l'utente si sta muovendo ad una certa velocità. Questo perché eventuali correlazioni tra sensori differenti verranno prese in considerazione dal sistema che, facendo uso di apprendimento automatico, riconoscerà questi legami ed effettuerà il calcolo dello stato dell'utente tenendone conto.
+
+
+% \section{Il compito del sensore Bluetooth}
+% La quasi totalità delle automobili prodotte al giorno d'oggi hanno un'autoradio dotata di tecnologia Bluetooth installata, dando la possibilità agli autisti di riprodurre musica, effettuare chiamate o utilizzare software come Android Auto o Apple Car Play per sfruttare alcune funzionalità dello smartphone durante la guida.\cite{ref:car-bluetooth} L'obiettivo del mio tirocinio è stato aggiungere al sistema precedentemente descritto un sensore bluetooth in grado di capire se l'utente sta conducendo un veicolo. Esso dovrà restituire un valore di confidenza adeguato calcolato sulla base dei dispositivi connessi allo smartphone di quest'ultimo tramite la medesima tecnologia.

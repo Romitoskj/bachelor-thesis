@@ -1,36 +1,6 @@
-\chapter{Integrazione del Sensore Bluetooth in Generocity}
-Implementazioni di quanto detto in precedenza su Generocity con qualche piccola modifica.
-
-Specificare anche la struttura dei package
-
-\section{Aggiunta della classe BluetoothSensor per collegare il sensore al resto dell'applicazione}
-Estende la classe Sensor e ascolta i cambiamenti del controller bluetooth
-
-\section{Algoritmo per il rilevamento di una macchina}
-
-\section{La confidenza calcolata dal sensore e i dati inviati al server}
-\[connectionScore(connectionCount) = \frac{25}{10000} * (1.4^{connectionCount-1} - 1)\]
-
-\begin{figure}[t]
-    \centering
-    \caption{Incremento della confidenza basato sul numero di connessioni}
-    \label{fig:confidence-func}
-\begin{tikzpicture}
-\begin{axis}[
-    axis lines = left,
-    width = 13cm,
-    xmax=15,
-    xlabel=numero di connessioni,
-    xtick={0,...,16},
-    ymax=1,
-    ylabel=confidenza
-]
-  \addplot[
-        blue,
-        thick,
-        domain= 1:15,
-        samples=100
-    ] {0.75 + 0.0025 * (1.4^(x-1) -1)};
-\end{axis}
-\end{tikzpicture}
-\end{figure}
+\chapter{Conclusione}
+\section{Sviluppi futuri}
+\begin{itemize}
+    \item sostituzione media pesata con modello per il calcolo della confidenza
+    \item migliorare l'accuratezza con cui viene deciso se un dispositivo è un'automobile o no chiamando un endpoint che controlla se il il nome del dispositivo bluetooth contiene il nome di un modello di una macchina
+\end{itemize}

@@ -1,45 +1,41 @@
-\chapter{L'Utilizzo delle API di Android per la Connettività via Bluetooth}
+\chapter{Integrazione del sensore bluetooth in Generocity} \label{chap:Bluetooth-sensor}
+In questo capitolo verrà descritto come il è stato integrato il sensore Bluetooth nel sistema precedentemente descritto. Esso utilizzerà alcune delle funzionalità e dettagli implementativi illustrati nel capitolo \ref{chap:app-separata} a cui verranno aggiunti degli algoritmi per rilevare la connessione di automobili e per il calcolo della confidenza.
 
-Come anticipato nel precedente capitolo, è stata da me sviluppata un'applicazione indipendente che mi permettesse di utilizzare e analizzare per la prima volta le API di Android per la connettività via bluetooth\cite{ref:bluetooth-doc}. Ciò è stato fatto al fine di trovare una strategia efficiente da adottare nello sviluppo del sensore finale in GeneroCity, dato che essa contiene molte altre funzionalità e sarebbe stato più difficoltoso effettuare questo tipo di sperimentazione al suo interno. Questa applicazione permette l'esecuzione di tre task ritenute una buon punto di partenza per ciò che avrebbe dovuto fare il sensore bluetooth. Esse sono:
-\begin{itemize}
-    \item la rilevazione del cambiamento dello stato del modulo bluetooth dello smartphone (principalmente la sua accensione e lo spegnimento);
-    \item l'ottenimento dei dati riguardanti i dispositivi che vengono connessi al bluetooth;
-    \item l'esecuzione di scansioni per trovare dispositivi nelle vicinanze.
-\end{itemize}
+Implementazioni di quanto detto in precedenza su Generocity con qualche piccola modifica.
 
-Problema dell'impossibilità di richiedere al sistema la lista dei dispositivi connessi ma necessità di ascoltare gli eventi di sistema
+Specificare anche la struttura dei package
 
-\subsubsection{System Broadcast}
-Spiegazione System Broadcast e della loro ricezione
+\section{L'ggiunta della classe BluetoothSensor ed il nuovo Controller}
+Estende la classe Sensor e ascolta i cambiamenti del controller bluetooth
 
-In questo capitolo verranno illustrati i vari componenti di questa applicazione indipendente e, nello specifico, come essi utilizzano le funzionalità esposte dalle API di Android per la connettività via Bluetooth. 
+\section{Algoritmo per il rilevamento di una macchina}
 
+\section{La confidenza calcolata dal sensore e i dati inviati al server}
+\[connectionScore(connectionCount) = \frac{25}{10000} * (1.4^{connectionCount-1} - 1)\]
 
-\section{Broadcast Receiver}
+\begin{figure}[t]
+    \centering
+    \caption{Incremento della confidenza basato sul numero di connessioni}
+    \label{fig:confidence-func}
+\begin{tikzpicture}
+\begin{axis}[
+    axis lines = left,
+    width = 13cm,
+    xmax=15,
+    xlabel=numero di connessioni,
+    xtick={0,...,16},
+    ymax=1,
+    ylabel=confidenza
+]
+  \addplot[
+        blue,
+        thick,
+        domain= 1:15,
+        samples=100
+    ] {0.75 + 0.0025 * (1.4^(x-1) -1)};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
 
-\subsubsection{Status Receiver}
-
-\subsubsection{Discovery Receiver}
-
-\subsubsection{Found Device Receiver}
-
-\subsubsection{Connection Receiver}
-
-\subsubsection{Background Connection Receiver}
-
-
-\section{Il Controller}
-Gestione dei broadcast receiver , mantenimento dei dispositivi accoppiati, connessi e scansionati e notifica degli aggiornamenti.
-
-
-\section{Presentazione dei dati}
-Main Activity che permette la visualizzazione dei dispositivi connessi, accoppiati e scansionati e anche di iniziare una scansione dei dispositivi vicini.
-
-\subsection{Recycler View e Adapter}
-In ascolto per gli aggiornamenti notificati dal controller
-
-
-\section{Design Pattern Utilizzati}
-\subsubsection{Model-View-Controller Pattern}
-\subsubsection{Singleton pattern}
-\subsubsection{Observer pattern}
+\section{La presentazione dei dati}
+\section{Testing}
