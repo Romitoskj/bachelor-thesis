@@ -13,14 +13,14 @@ in GeneroCity, dato che essa contiene molte altre funzionalità e di conseguenza
     \item l'ottenimento dei dati riguardanti i dispositivi che vengono connessi al Bluetooth;
     \item l'esecuzione di scansioni per trovare dispositivi nelle vicinanze.
 \end{itemize}
-La scansione dei dispositivi vicini, nonostante sia stata implementata in quest'applicazione, è stata un'idea successivamente scartata nella realizzazione del sensore Bluetooth per due principali motivi: essa, se ripetuta svariate volte, può provocare un eccessivo consumo della batteria e, inoltre, è molto raro che gli stereo delle macchine si rendano visibili ai dispositivi vicini. Attraverso svariati test è stato notato che tutte le macchine prese in esame erano rilevabili via scansione Bluetooth solamente quando è stata effettuata la procedura per accoppiare\footnote{Con accoppiamento Bluetooth si intende il pairing, ossia il processo in cui due dispositivi Bluetooth effettuano la prima connessione e si scambiano le chiavi di sicurezza, le quali verranno memorizzate per permettere di effettuare rapidamente le connessioni successive.} un nuovo smartphone alla macchina. Di conseguenza non poter trovare le macchine nelle vicinanze attraverso le scansione rende l'utilizzo di questa funzionalità pressoché inutile in GeneroCity. Nonostante ciò ne verrà comunque descritta l'implementazione in quest'applicazione separata.
+La scansione dei dispositivi vicini, nonostante sia stata implementata in quest'applicazione, è stata un'idea successivamente scartata nella realizzazione del sensore Bluetooth per due principali motivi: essa, se ripetuta svariate volte, può provocare un eccessivo consumo della batteria e, inoltre, è molto raro che le radio delle macchine si rendano visibili ai dispositivi vicini. Attraverso svariati test è stato notato che tutte le macchine prese in esame erano rilevabili via scansione Bluetooth solamente quando è stata effettuata la procedura per accoppiare\footnote{Con accoppiamento Bluetooth si intende il pairing, ossia il processo in cui due dispositivi Bluetooth effettuano la prima connessione e si scambiano le chiavi di sicurezza, le quali verranno memorizzate per permettere di effettuare rapidamente le connessioni successive.} un nuovo smartphone alla macchina. Di conseguenza non poter trovare le macchine nelle vicinanze attraverso le scansione rende l'utilizzo di questa funzionalità pressoché inutile in GeneroCity. Nonostante ciò ne verrà comunque descritta l'implementazione nel progetto separato.
 
-In questo capitolo verranno quindi illustrati i vari componenti di questa applicazione, come essa implementa le suddette task e ne consenta la visualizzazione dei risultati. 
+In questo capitolo verranno quindi illustrati i vari componenti dell'applicazione e come essi implementano le suddette task consentendone la visualizzazione dei risultati. 
 
 \section{I Broadcast Receiver}
-Il primo problema che si è presentato nella realizzazione dell'applicazione è stato l'impossibilità di ottenere la lista dei dispositivi connessi al Bluetooth in maniera sincrona tramite le funzionalità messe a disposizione dalle API di Android. Infatti il sistema operativo non permette di essere interrogato direttamente dai singoli processi, piuttosto è esso a notificarli quando avvengono degli eventi di sistema, inviando dei messaggi denominati \textit{system broadcast}. Le applicazioni potranno quindi registrarsi per ricevere messaggi relativi ad eventi specifici, ad esempio quando avviene l'accensione e lo spegnimento della modalità aereo il sistema manderà un system broadcast a tutte le app registrate per ricevere questo evento. Questa registrazione avviene attraverso la creazione di oggetti la cui classe estende quella dei \textit{BroadcastReceiver}.\cite{ref:android-broadcast}
+Il primo problema che si è presentato nella realizzazione dell'applicazione è stato l'impossibilità di ottenere la lista dei dispositivi connessi al Bluetooth in maniera sincrona tramite le funzionalità messe a disposizione dalle API\footnote{Una API, acronimo di Application Software Interface, è un tipo di interfaccia software che permette ad un programma di offrire servizi e funzionalità ad altri software.} di Android. Infatti il sistema operativo non permette di essere interrogato direttamente dai singoli processi, piuttosto è esso a notificarli quando avvengono degli eventi di sistema, inviando dei messaggi denominati \textit{system broadcast}. Le applicazioni potranno quindi registrarsi per ricevere messaggi relativi ad eventi specifici, ad esempio quando avviene l'accensione e lo spegnimento della modalità aereo il sistema manderà un system broadcast a tutte le app registrate per ricevere questo evento. Questa registrazione avviene attraverso la creazione di oggetti la cui classe estende quella dei \textit{BroadcastReceiver}.\cite{ref:android-broadcast}
 
-La classe sopracitata espone un metodo astratto, denominato \textit{onReceive}, il quale può essere sovrascritto per definire il comportamento adottato dal programma quando viene ricevuto un system broadcast. Questo metodo ha come parametri il contesto dell'applicazione e l'intent, ossia una rappresentazione dell'evento che ha scaturito la notifica.
+La classe sopracitata espone un metodo astratto, denominato \textit{onReceive}, il quale deve essere implementato per definire il comportamento adottato dal programma quando viene ricevuto un system broadcast. Questo metodo ha come parametri il contesto, vale a dire lo stato dell'applicazione al momento in cui è avvenuto, l'evento e l'intent, ossia una rappresentazione dell'evento che ha scaturito la notifica.
 
 \begin{minted}[
 framesep=2mm,
@@ -31,7 +31,7 @@ breaklines
 public abstract void onReceive(Context context, Intent intent);
 \end{minted}
 
-Infine è necessario utilizzare il metodo registerReceiver della classe Context per attuare l'effettiva registrazione al fine di ricevere system broadcast e gestirli attraverso il broadcast receiver definito precedentemente. Per far ciò bisogna inoltre dichiarare quali tipologie di eventi esso ascolta, creando un IntentFilter. Viene riportato qui sotto un esempio di codice dove viene registrato un broadcast receiver:
+Infine è necessario utilizzare il metodo registerReceiver della classe Context per attuare l'effettiva registrazione al fine di ricevere system broadcast e gestirli attraverso il broadcast receiver passato come parametro. Per far ciò bisogna inoltre dichiarare quali tipologie di eventi esso ascolta, creando un IntentFilter. Viene riportato qui sotto un esempio di codice dove viene registrato un broadcast receiver:
 \begin{minted}[
 framesep=2mm,
 linenos,
@@ -46,7 +46,7 @@ context.registerReceiver(br, filter);
 Tutti i broadcast receiver definiti si occuperanno solamente di catturare l'evento, sarà poi un metodo astratto, specifico per ognuno di essi, ad essere esteso per implementare l'algoritmo scaturito da esso. Questi metodi saranno estesi direttamente alla creazione dei receiver nella classe Controller, la quale verrà discussa nel paragrafo \ref{ref:controller}. Inoltre tutti i receiver intercettano gli eventi anche quando l'applicazione è in background, pertanto il funzionamento dell'app è inalterato quando essa è in esecuzione ma l'utente non la sta utilizzando direttamente. Di seguito verranno elencati i broadcast receiver implementati e, per ciascuno di essi, verranno discussi i system broadcast che riceveranno e riportato il codice del metodo \textit{onReceive}.
 
 \subsubsection{StatusChangeReceiver}
-Esso è il broadcast receiver più semplice ed è stato definito per rilevare l'accensione e lo spegnimento del Bluetooth del dispositivo. Questo receiver si occuperà di intercettare gli eventi che cambiano lo stato del Bluetooth, ossia del tipo \textit{BluetoothAdapter.ACTION\_STATE\_CHANGED}.
+Esso è il broadcast receiver più semplice ed è stato definito per rilevare l'accensione e lo spegnimento del Bluetooth del dispositivo. Questo receiver si occuperà di intercettare gli eventi che cambiano lo stato della radio Bluetooth, ossia del tipo \textit{BluetoothAdapter.ACTION\_STATE\_CHANGED}.
 \begin{minted}[
 framesep=2mm,
 linenos,
@@ -79,7 +79,7 @@ public void onReceive(Context context, Intent intent) {
 }
 \end{minted}
 
-Nel caso in cui il Bluetooth sia stato acceso o spento verrà chiamato il metodo astratto \textit{onStatusChanged}, il quale ha come parametro un booleano che indica lo stato del Bluetooth. Questo metodo sarà quindi esteso per definire cosa l'applicazione dovrà fare quando ciò avviene.
+Nel caso in cui il Bluetooth sia stato acceso o spento verrà chiamato il metodo astratto \textit{onStatusChanged}, il quale ha come parametro un booleano che indica lo stato del Bluetooth (true quando è accesso e false se spento). Questo metodo sarà quindi esteso per definire cosa l'applicazione dovrà fare quando ciò avviene.
 \begin{minted}[
 framesep=2mm,
 linenos,
@@ -140,7 +140,7 @@ public abstract void onDeviceFound(BluetoothDevice device);
 
 
 \subsubsection{ConnectionReceiver}
-Il suddetto receiver intercetta gli eventi di tipo \textit{BluetoothDevice.ACTION\_ACL\_CONNECTED} e \textit{BluetoothDevice.ACTION\_ACL\_DISCONNECTED} per ottenere i dispositivi che vengono connessi e disconnessi dal Bluetooth. Quando ciò avviene verrà utilizzata la funzione di mappatura citata precedentemente per prelevarne le informazioni di interesse dai dispositivi.
+Gli eventi di tipo \textit{BluetoothDevice.ACTION\_ACL\_CONNECTED} e \textit{BluetoothDevice.ACTION\_ACL\_DISCONNECTED} per ottenere informazioni sui dispositivi che vengono connessi e disconnessi dal Bluetooth saranno gestiti da questo receiver. Quando ciò avviene verrà utilizzata la funzione di mappatura citata precedentemente per prelevarne le informazioni di interesse dai dispositivi.
 \begin{minted}[
 framesep=2mm,
 linenos,
@@ -199,7 +199,7 @@ public abstract void onDeviceDisconnection(Context context, BluetoothDevice devi
 \end{minted}
 
 \subsubsection{ImplicitConnectionReceiver}
-La creazione di questo receiver deriva dal problema che tutti quelli descritti precedentemente vengono registrati una volta che viene avviata l'applicazione, pertanto se sono già connessi dei dispositivi Bluetooth prima dell'avvio il ConnectionReceiver non è in grado di rilevarli. L'ImplicitConnectionReceiver nasce proprio per questo scopo, difatti esso è una sottoclasse di ConnectionReceiver e funzionerà anche quando l'applicazione è completamente chiusa: esso viene registrato nel manifest\footnote{Il manifest Android è un file che definisce la struttura, le funzionalità e i requisiti di un'applicazione Android.} dell'applicazione, sarà quindi il sistema operativo a "svegliarla" se essa non è in esecuzione quando avviene una connessione o disconnessione di un dispositivo Bluetooth. Segue la porzione di manifest dove viene dichiarato il receiver specificandone gli intent per cui esso sarà notificato.
+La creazione di questo receiver deriva dal fatto che tutti quelli descritti precedentemente vengono registrati una volta che viene avviata l'applicazione, pertanto se ci sono già connessi dei dispositivi Bluetooth prima dell'avvio il ConnectionReceiver non è in grado di rilevarli. L'ImplicitConnectionReceiver nasce per risolvere questo problema, difatti esso è una sottoclasse di ConnectionReceiver e funzionerà anche quando l'applicazione è completamente chiusa: esso viene registrato nel manifest\footnote{Il manifest Android è un file che definisce la struttura, le funzionalità e i requisiti di un'applicazione Android.} dell'applicazione e sarà quindi il sistema operativo a "svegliarla" se essa non è in esecuzione, così da permettere l'esecuzione di codice in risposta ad una connessione o disconnessione di un dispositivo Bluetooth. Segue la porzione di manifest dove viene dichiarato il receiver specificandone gli intent per cui esso sarà notificato.
 \begin{minted}[
 framesep=2mm,
 linenos,
@@ -248,7 +248,7 @@ public void onDeviceDisconnection(Context context, BluetoothDevice device) {
 }
 \end{minted}
 
-Grazie a questo receiver il Controller, non appena verrà istanziato, potrà ottenere i dispositivi connessi precedentemente l'avvio in quanto verranno caricati dal file da esso aggiornato.
+Grazie a questo receiver il Controller, non appena verrà istanziato all'avvio dell'applicazione, potrà ottenere i dispositivi connessi precedentemente l'avvio in quanto verranno caricati dal file da esso aggiornato.
 
 \section{Il Controller} \label{ref:controller}
 Il Controller è l'unità centrale dell'applicazione infatti esso si occupa di mantenere gli insiemi dei dispositivi Bluetooth accoppiati al telefono, quelli rilevati dalle scansioni e infine i dispositivi connessi. Esso implementa due design pattern\footnote{Un design pattern, traducibile in schema di progettazione, nell'ambito dell'ingegneria del software è una soluzione generale ad un problema ricorrente.}: il \textbf{singleton pattern}, il quale consente alla classe Controller di avere un'unica istanza accessibile da qualunque punto del codice, e l'\textbf{observer pattern} che permette ad a altri oggetti di registrarsi per venire notificati dal Controller quando esso cambia il suo stato. In particolare lo stato del Controller è rappresentato da i suoi seguenti attributi:
@@ -354,7 +354,7 @@ BluetoothDeviceAdapter connectedDeviceAdapter = new BluetoothDeviceAdapter(this)
     }
 };
 \end{minted}
-L'unica differenza che avranno gli altri BluetoothDevice adapter è quale lista di dispositivi viene richiesta dal Controller: l'adapter che si occupa dei dispositivi accoppiati userà il metodo \textit{getPairedDevices} del Controller, mentre quello che si occupa dei dispositivi scansionati \textit{getScannedDevices}.
+L'unica differenza che avranno gli altri BluetoothDevice adapter è quale lista di dispositivi essi richiederanno al Controller: per ottenere la lista aggiornata l'adapter che si occupa dei dispositivi accoppiati userà il metodo \textit{getPairedDevices} del Controller, quello che si occupa dei dispositivi scansionati \textit{getScannedDevices}, mentre, come visto sopra, quello relativo ai dispositivi connessi \textit{getConnectedDevices}.
 
 Infine i metodi updateDevices di ogni BluetoothDeviceAdapter saranno registrati come listener del Controller. In tal modo ogni qual volta viene aggiornato lo stato di quest'ultimo e verranno notificati i listener questi metodi saranno eseguiti così da avere un riscontro grafico dell'aggiornamento avvenuto.
 \begin{minted}[
@@ -368,9 +368,9 @@ controller.addListener(scannedDeviceAdapter::updateDevices);
 controller.addListener(connectedDeviceAdapter::updateDevices);
 \end{minted}
 
-Ora che sono stati definiti tutti i componenti si può fornire un esempio di flusso di aggiornamento dell'applicazione, nello specifico esso verrà descritto in seguito alla connessione di un dispositivo Bluetooth: quando ciò avviene l'evento viene rilevato dal ConnectionReceiver il quale esegue il metodo onDeviceConnection, che si occupa di aggiungere il dispositivo all'insieme dei dispositivi connessi del Controller. Una volta fatto ciò il medesimo metodo notificherà tutti i listener del Controller per avvertire del cambiamento di stato e di conseguenza essi verranno eseguiti sequenzialmente. Tra i listener è presente il metodo updateDevices del connectedDeviceAdapter il quale interrogherà il Controller per ottenere la lista aggiornata dei dispositivi connessi e farà partire la procedura di rendering grafico della lista utilizzando i nuovi dati ottenuti. In maniera equivalente ciò avverrà per tutte le altre liste quando accade un evento che aggiorna uno degli insiemi dei dispositivi ed invece, per quanto riguarda il cambiamento di stato del modulo Bluetooth del telefono, se il Bluetooth viene spento le liste saranno rimpiazzate da un messaggio che intima l'utente di accenderlo e saranno nuovamente mostrate quando esso viene acceso. 
+Ora che sono stati definiti tutti i componenti si può fornire un esempio del flusso di aggiornamento dell'applicazione, nello specifico esso verrà descritto in seguito alla connessione di un dispositivo Bluetooth: quando ciò accade il ConnectionReceiver viene notificato il quale esegue il metodo onDeviceConnection, che si occupa di aggiungere il dispositivo all'insieme dei dispositivi connessi del Controller. Una volta fatto ciò, a seguito del cambiamento di stato, verranno eseguiti sequenzialmente tutti i listener registrati. Tra di essi è presente il metodo updateDevices del connectedDeviceAdapter il quale interrogherà il Controller per ottenere la lista aggiornata dei dispositivi connessi e farà partire la procedura di rendering grafico della lista utilizzando i nuovi dati ottenuti. In maniera equivalente ciò avverrà per tutte le altre liste quando accade un evento che aggiorna uno degli insiemi dei dispositivi ed invece, per quanto riguarda il cambiamento di stato del modulo Bluetooth del telefono, se il Bluetooth viene spento le liste saranno rimpiazzate da un messaggio che intima l'utente di accenderlo e saranno nuovamente mostrate quando esso viene acceso. 
 
 \section{Testing}
-A pari passo con lo sviluppo di questa applicazione è stato verificato il suo funzionamento su più smartphone e, al termine di esso, è stato possibile rilevare le connessione di dispositivi Bluetooth, sia con l'applicazione in foreground che in background, ed effettuare scansioni per trovarne di nuovi, il tutto con successo e senza incorrere in alcun tipo di errore. A questo punto si è potuto procedere con l'implementazione del sensore Bluetooth andando ad integrare in GenerCity un sistema basato su quanto progettato per quest'applicazione
+A pari passo con lo sviluppo di questa applicazione è stato verificato il suo funzionamento su più smartphone e, al termine di esso, è stato possibile rilevare le connessione di dispositivi Bluetooth, sia con l'applicazione in foreground che in background, ed effettuare scansioni per trovarne di nuovi, il tutto con successo e senza incorrere in alcun tipo di errore. A questo punto si è potuto procedere con l'implementazione del sensore Bluetooth andando ad integrare in GeneroCity un sistema basato su quanto progettato per quest'applicazione
 
-Nel prossimo capitolo verrà illustrata Generocity e in particolare il suo sistema di coordinazione tra i sensori per poi passare, nel capitolo \ref{chap:Bluetooth-sensor}, all'integrazione del nuovo sensore Bluetooth.
+Nel prossimo capitolo verrà illustrata Generocity e in particolare il suo sistema di sensori per poi descrivere, nel capitolo \ref{chap:Bluetooth-sensor}, l'integrazione del nuovo sensore Bluetooth.

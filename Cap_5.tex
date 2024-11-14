@@ -1,6 +1,13 @@
 \chapter{Conclusione}
+Il lavoro descritto in questa tesi ha portato allo sviluppo e all'integrazione di un sensore Bluetooth all'interno dell'applicazione GeneroCity, con l'obiettivo di rilevare in modo affidabile quando un utente è alla guida di un veicolo. Questa soluzione contribuisce a rendere l'esperienza degli utenti più sicura e comoda, riducendo la necessità di interazioni manuali durante la guida e facilitando la gestione intelligente dei parcheggi urbani.
+
+L'implementazione del sensore ha richiesto un'analisi approfondita delle API Android e la creazione di una strategia per la gestione delle connessioni Bluetooth. Il modulo sviluppato utilizza un approccio modulare e indipendente, che permette di integrare facilmente ulteriori sensori in futuro, favorendo una maggiore scalabilità e l'adozione di algoritmi di apprendimento automatico per migliorare la precisione delle rilevazioni.
+
+Il sensore sviluppato ha dimostrato di essere efficace nei test effettuati, rilevando correttamente la connessione a dispositivi compatibili con il contesto di guida, come le autoradio. Questo modulo, oltre a contribuire al funzionamento complessivo di GeneroCity, ha mostrato come l'uso delle tecnologie Bluetooth possa essere una soluzione utile e non invasiva per raccogliere dati sullo stato dell'utente.
+
+
 \section{Sviluppi futuri}
-\begin{itemize}
-    \item sostituzione media pesata con modello per il calcolo della confidenza
-    \item migliorare l'accuratezza con cui viene deciso se un dispositivo è un'automobile o no chiamando un endpoint che controlla se il il nome del dispositivo bluetooth contiene il nome di un modello di una macchina
-\end{itemize}
+Per migliorare ulteriormente il sistema, si potrebbero adottare modelli di machine learning per il calcolo dello stato di guida, sostituendo la media pesata con algoritmi più sofisticati. Inoltre, sarebbe utile implementare un servizio esterno per verificare se il nome del dispositivo Bluetooth corrisponda a modelli di veicoli conosciuti, incrementando così l'accuratezza del riconoscimento.
+
+L'espansione e la precisione del sistema di rilevamento basato su sensori intelligenti come quello descritto in questa tesi rappresentano una direzione promettente per lo sviluppo di applicazioni future nel campo della mobilità urbana e delle smart cities.
+

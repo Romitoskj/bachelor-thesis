@@ -6,7 +6,7 @@ In questo capitolo verrà descritta l'applicazione di GeneroCity e in particolar
 L'applicazione di Generocity è basata su un'architettura di tipo client-server\footnote{Il sistema client-server è un'architettura di rete dove un dispositivo terminale o client si connette ad un server per usufruire di un servizio.} ed è quindi divisa in due componenti principali tra loro interconnesse: il \textit{backend} e il \textit{frontend}. Queste due componenti comunicano tra di loro utilizzando il protocollo HTTP\footnote{HTTP, acronimo di HyperText Transfer Protocol, è il principale protocollo di livello applicativo usato per il trasferimento di dati sul web.}.
 
 \subsection{Backend}
-Il backend è il software che si occupa dell'effettiva elaborazione dei dati e di gestire il database al fine di immagazzinarli e accedere ad essi. Esso espone delle funzionalità attraverso una web API\footnote{Una API, acronimo di Application Software Interface, è un tipo di interfaccia software che permette ad un programma di offrire servizi e funzionalità ad altri software.}, definendo come le altre componenti software devono interagire con il server senza la necessità di condividere codice sorgente ma effettuando delle richieste HTTP a degli specifici URL chiamati endpoint.
+Il backend è il software che si occupa dell'effettiva elaborazione dei dati e di gestire il database al fine di immagazzinarli e accedere ad essi. Esso espone delle funzionalità attraverso una web API, definendo come le altre componenti software devono interagire con il server senza la necessità di condividere codice sorgente ma effettuando delle richieste HTTP a degli specifici URL chiamati endpoint.
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\linewidth]{images/rest.png}
