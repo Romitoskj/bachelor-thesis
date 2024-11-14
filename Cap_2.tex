@@ -1,6 +1,13 @@
 \chapter{L'utilizzo di Android per lo sviluppo del sensore Bluetooth}
 \label{chap:app-separata}
-Prima di sviluppare il sensore si è scelto di creare una piccola applicazione a sé stante con lo scopo di prendere dimestichezza con l'SDK\footnote{Acronimo che sta per Software Development Kit, ossia un'insieme di strumenti per lo sviluppo del software} di Android per Java, nello specifico con le sue funzionalità riguardanti la connettività via Bluetooth\cite{ref:bluetooth-doc}. Ciò è stato fatto al fine di trovare una strategia efficiente da adottare nello sviluppo del sensore finale in GeneroCity, dato che essa contiene molte altre funzionalità e di conseguenza sarebbe stato più difficoltoso effettuare questo tipo di sperimentazione al suo interno. Questa applicazione permette l'esecuzione di tre task, la cui implementazione è stata ritenuta un buon punto di partenza per lo sviluppo del sensore Bluetooth. Esse sono:
+Prima di sviluppare il sensore si è scelto di creare una piccola applicazione a sé stante con lo scopo di prendere dimestichezza con l'SDK\footnote{Acronimo che sta per Software Development Kit, ossia un'insieme di strumenti per lo sviluppo del software} di Android per Java, nello specifico con le sue funzionalità riguardanti la connettività via Bluetooth\cite{ref:bluetooth-doc}. Ciò è stato fatto al fine di trovare una strategia efficiente da adottare nello sviluppo del sensore finale
+\begin{wrapfigure}[23]{l}{0.4\textwidth}
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/separate_app.png}
+    \caption{Interfaccia dell'app}
+    \label{fig:separate_app}
+\end{wrapfigure}
+in GeneroCity, dato che essa contiene molte altre funzionalità e di conseguenza sarebbe stato più difficoltoso effettuare questo tipo di sperimentazione al suo interno. Questa applicazione permette l'esecuzione di tre task, la cui implementazione è stata ritenuta un buon punto di partenza per lo sviluppo del sensore Bluetooth. Esse sono:
 \begin{itemize}
     \item la rilevazione del cambiamento dello stato del modulo bluetooth dello smartphone, più specificatamente la sua accensione e lo spegnimento;
     \item l'ottenimento dei dati riguardanti i dispositivi che vengono connessi al Bluetooth;
@@ -320,20 +327,50 @@ private FoundDeviceReceiver foundDeviceReceiver = new FoundDeviceReceiver() {
 \end{minted}
 
 \section{La presentazione dei dati}
-L'ultimo componente di questa piccola applicazione è l'interfaccia utente che permetterà a quest'ultimo di visualizzare i dispositivi amministrati dal controller e di far partire le scansioni Bluetooth attraverso un bottone.
+L'ultimo componente di quest'applicazione è l'interfaccia utente che permetterà la visualizzazione dispositivi amministrati dal Controller e di far partire le scansioni Bluetooth attraverso un bottone. Essa mostrerà i dispositivi divisi in tre elenchi differenti: uno per i dispositivi connessi, uno per quelli accoppiati e infine uno per quelli trovati via scansione. Queste liste sono amministrate da tre oggetti diversi tutti appartenenti alla classe \textit{BluetoothDeviceAdapter}, la quale si occupa di convertire gli elementi di una lista di dispositivi in una componente grafica che ne riporta le relative informazioni, come visibile in figura \ref{fig:separate_app}.
+Inoltre in questa classe è presente un metodo astratto, denominato \textit{updateDevices}, che si occupa di aggiornare la lista dei dispositivi dell'adapter:
+\begin{minted}[
+framesep=2mm,
+linenos,
+bgcolor=LightGray,
+breaklines
+]{java}
+public abstract void updateDevices();
+\end{minted}
+Esso sarà implementato alla creazione dei vari BluetoothDeviceAdapter in modo da ottenere dal Controller la lista dei dispositivi utili per l'adapter e successivamente notificarlo del cambiamento, così facendo esso renderizzerà nuovamente i suoi componenti grafici con i nuovi dati. Poiché l'implementazione è pressoché uguale per tutti gli adapter, si riporta come esempio solamente il codice di quello utilizzato per aggiornare i dispositivi connessi:
+\begin{minted}[
+framesep=2mm,
+linenos,
+bgcolor=LightGray,
+breaklines
+]{java}
+BluetoothDeviceAdapter connectedDeviceAdapter = new BluetoothDeviceAdapter(this) {
+    @Override
+    public void updateDevices() {
+        BluetoothController controller = BluetoothController
+            .getInstance(MainActivity.this);
+        devices = controller.getConnectedDevices();
+        notifyDataSetChanged();
+    }
+};
+\end{minted}
+L'unica differenza che avranno gli altri BluetoothDevice adapter è quale lista di dispositivi viene richiesta dal Controller: l'adapter che si occupa dei dispositivi accoppiati userà il metodo \textit{getPairedDevices} del Controller, mentre quello che si occupa dei dispositivi scansionati \textit{getScannedDevices}.
 
-Essa mostrerà tre elenchi di dispositivi (accoppiati, connessi e scansionati) i quali sono popolate dalla classe BluetoothDeviceAdapter, che si occupa di convertire i dispositivi in componenti grafici. Questa classe mantiene una lista dei dispositivi mostrati che sarà aggiornata dal metodo \textit{updateDevices}, che sarà, per ogni lista mostrata nell'interfaccia, il principale listener del Controller. Infatti ci sarà un adapter che si occuperà dei dispositivi accoppiati, uno dei dispositivi connessi ed uno dei dispositivi scansionati
-\begin{wrapfigure}[23]{r}{0.5\textwidth}
-    \centering
-    \includegraphics[width=0.9\linewidth]{images/separate_app.png}
-    \caption{Interfaccia utente dell'app}
-    \label{fig:separate_app}
-\end{wrapfigure}
-In ascolto per gli aggiornamenti notificati dal controller
+Infine i metodi updateDevices di ogni BluetoothDeviceAdapter saranno registrati come listener del Controller. In tal modo ogni qual volta viene aggiornato lo stato di quest'ultimo e verranno notificati i listener questi metodi saranno eseguiti così da avere un riscontro grafico dell'aggiornamento avvenuto.
+\begin{minted}[
+framesep=2mm,
+linenos,
+bgcolor=LightGray,
+breaklines
+]{java}
+controller.addListener(pairedDeviceAdapter::updateDevices);
+controller.addListener(scannedDeviceAdapter::updateDevices);
+controller.addListener(connectedDeviceAdapter::updateDevices);
+\end{minted}
 
-
+Ora che sono stati definiti tutti i componenti si può fornire un esempio di flusso di aggiornamento dell'applicazione, nello specifico esso verrà descritto in seguito alla connessione di un dispositivo Bluetooth: quando ciò avviene l'evento viene rilevato dal ConnectionReceiver il quale esegue il metodo onDeviceConnection, che si occupa di aggiungere il dispositivo all'insieme dei dispositivi connessi del Controller. Una volta fatto ciò il medesimo metodo notificherà tutti i listener del Controller per avvertire del cambiamento di stato e di conseguenza essi verranno eseguiti sequenzialmente. Tra i listener è presente il metodo updateDevices del connectedDeviceAdapter il quale interrogherà il Controller per ottenere la lista aggiornata dei dispositivi connessi e farà partire la procedura di rendering grafico della lista utilizzando i nuovi dati ottenuti. In maniera equivalente ciò avverrà per tutte le altre liste quando accade un evento che aggiorna uno degli insiemi dei dispositivi ed invece, per quanto riguarda il cambiamento di stato del modulo Bluetooth del telefono, se il Bluetooth viene spento le liste saranno rimpiazzate da un messaggio che intima l'utente di accenderlo e saranno nuovamente mostrate quando esso viene acceso. 
 
 \section{Testing}
-A pari passo con lo sviluppo di questa applicazione è stato verificato il suo funzionamento su più smartphone e, al termine di esso, è stato possibile rilevare le connessione di dispositivi Bluetooth, sia con l'applicazione in foreground che in background, ed effettuare scansioni per trovarne di nuovi. A questo punto si è potuto procedere con l'implementazione del sensore Bluetooth andando ad integrare in GenerCity un sistema simile a quello progettato per quest'applicazione
+A pari passo con lo sviluppo di questa applicazione è stato verificato il suo funzionamento su più smartphone e, al termine di esso, è stato possibile rilevare le connessione di dispositivi Bluetooth, sia con l'applicazione in foreground che in background, ed effettuare scansioni per trovarne di nuovi, il tutto con successo e senza incorrere in alcun tipo di errore. A questo punto si è potuto procedere con l'implementazione del sensore Bluetooth andando ad integrare in GenerCity un sistema basato su quanto progettato per quest'applicazione
 
 Nel prossimo capitolo verrà illustrata Generocity e in particolare il suo sistema di coordinazione tra i sensori per poi passare, nel capitolo \ref{chap:Bluetooth-sensor}, all'integrazione del nuovo sensore Bluetooth.
