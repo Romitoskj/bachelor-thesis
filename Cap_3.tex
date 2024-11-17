@@ -32,7 +32,7 @@ La loro gestione, infatti,  avviene interamente nel frontend e richiede che il l
 \section{Il flusso di aggiornamento della confidenza dei sensori}
 Dato che in GeneroCity i sensori presenti sono molteplici, un fattore importante è la loro coordinazione: lo stato dell'utente sarà determinato basandosi sulla confidenza di ogni sensore ed è quindi importante che esso sia aggiornato ogni qualvolta un sensore cambia la sua confidenza. Per sincronizzare il lavoro dei sensori è stato quindi fondamentale definire delle funzionalità comuni che ogni sensore deve avere. Questo è stato possibile sfruttando il paradigma di programmazione orientata agli oggetti implementato in Java, in particolare è stata definita una classe astratta\footnote{Nella programmazione orientata agli oggetti una classe astratta è una classe che non può essere istanziata, la quale definisce delle funzionalità di base per tutte le sue sotto classi.} che tutti i sensori ereditano.
 
-\subsection{La classe astratta Sensor}
+\subsection{La classe astratta Sensor}\label{ref:sensor}
 Ogni sensore eredita dalla classe Sensor i seguenti attributi: il \textit{nome} univoco che identifica il sensore, la \textit{versione} del sensore, il \textit{peso} (rappresentato come numero reale) che ha il sensore nel calcolo dello stato dell'utente.
 
 Inoltre ogni sensore mantiene uno storico della confidenza che ha calcolato tramite una mappa ad albero\footnote{Una treemap è una struttura dati che implementa le funzionalità di normale una normale mappa, ossia immagazzina delle coppie (chiave, valore), e inoltre mantiene l'ordinamento delle coppie basato sull'ordinamento naturale delle chiavi.} che adotta come chiave lo Unix Timestamp, ossia il numero di secondi trascorsi dalla mezzanotte del 1° Gennaio 1970, che indica il momento in cui il valore è stato calcolato. Di seguito vengono riportati i principali metodi esposti da questa classe.
@@ -46,7 +46,7 @@ breaklines
 public abstract double getStatus(Calendar timestamp);
 \end{minted}
 Esso ha come parametro un Timestamp e restituisce la confidenza del sensore calcolata nell'istante più vicino a quello passato come parametro. Questo metodo è l'unico metodo astratto ed è quindi il metodo principale che i sensori concreti dovranno implementare.
-\subsubsection{update}
+\subsubsection{update}\label{ref:update-method}
 
 \begin{minted}[
 framesep=2mm,
@@ -104,7 +104,7 @@ private static double compute(Calendar time) {
 }
 \end{minted}
 
-\subsection{L'invio di dati al server}
+\subsection{L'invio di dati al server}\label{chap:sensorData}
 Come anticipato ogni qualvolta viene aggiornata la confidenza di un sensore il metodo update richiede in input un oggetto di tipo SensorData che rappresenta lo stato del sensore al momento dell'aggiornamento. Questo perché, prima che venga ricalcolata la confidenza media, viene chiamato il metodo \textit{collect} che serializza l'oggetto in formato JSON e lo invia al server tramite una richiesta HTTP all'endpoint in figura \ref{fig:endpoint}, il quale si occuperà di memorizzare i dati forniti dal sensore nel database. Questi dati vengono mantenuti al fine sia di tenere traccia del corretto funzionamento dei sensori, sia perché verranno utilizzati per l'allenamento di un modello di Machine Learning che verrà implementato in futuro in GeneroCity per determinare lo stato dell'utente.
 
 \begin{figure}[h]
@@ -139,7 +139,7 @@ La classe SensorData serializza le seguenti informazioni:
     \item \textit{action}: l'azione che il sensore ha rilevato (\textit{walking}, \textit{unknown} o \textit{automotive});
     \item \textit{data}: alcuni dati aggiuntivi specifici del sensore che ha effettuato la rilevazione, i quali indicano lo stato in cui si trovava il sensore. Ad esempio per il sensore Wi-Fi questi dati possono essere relativi alla rete a cui il dispositivo è connesso, mentre per il sensore GPS le coordinate geografiche in cui l'utente si trova.
 \end{itemize}
-Di seguito un esempio di body inviato dal sensore bluetooth attraverso una richiesta HTTP:
+Di seguito un esempio di body inviato dal sensore GPS attraverso una richiesta HTTP:
 \begin{minted}[
 framesep=2mm,
 linenos,
@@ -147,25 +147,16 @@ bgcolor=LightGray,
 breaklines
 ]{json}
 {
-   "action":"automotive",
-   "confidence":0.75436,
-   "data":{
-      "connected":[
-         {
-            "alias":"My Car",
-            "bluetooth_class":"Handsfree",
-            "connection_count":4,
-            "device_name":"Fiat Punto",
-            "is_car":true
-         }
-      ],
-      "bluetooth_enabled":true
-   },
-   "datetime":"2024-10-21T15:43:24.525+02:00"
+    "action":"walking",
+    "confidence":0.25436,
+    "data": {
+        "latitude": 46.70047381187384,
+        "longitude": 5.05308332812501,
+        "precision": 7.30493215740106
+     },
+    "datetime":"2024-10-21T15:43:24.525+02:00"
 }
 \end{minted}
-Come si può notare il campo data è costruito sulla base dello stato del sensore: in particolare si evince che il bluetooth è attivo e il dispositivo è connesso ad un dispositivo che viene identificato come macchina.
+Come si può notare il campo data è costruito sulla base dello stato del sensore, in particolare, in questo caso, sono presenti le coordinate geografiche in a cui si trova il dispositivo.
 
-In aggiunta a questi dati nel path della richiesta (figura \ref{fig:endpoint}) vengono anche mandati il nome del sensore utilizzato ed una chiave univoca usata per identificare la richiesta nel database. Essa è costruita utilizzando la versione del sensore, l'id dell'utente autenticato nell'applicazione ed il Timestamp del momento in cui viene inviata la richiesta.
-
-Inoltre, onde evitare un sovraccarico del server, è stato definito un tempo di \textit{cooldown} tra le richieste: ogni volta che viene notificato un aggiornamento da parte del sensore, se questo tempo non è trascorso dall'ultima richiesta, allora la richiesta viene scartata ma viene comunque ricalcolata la nuova media.
+In aggiunta a questi dati, nel path della richiesta (figura \ref{fig:endpoint}) vengono anche mandati il nome del sensore utilizzato ed una chiave univoca usata per identificare la richiesta nel database. Essa è costruita utilizzando la versione del sensore, l'id dell'utente autenticato nell'applicazione ed il Timestamp del momento in cui viene inviata la richiesta. Inoltre, onde evitare un sovraccarico del server, è stato definito un tempo di \textit{cooldown} tra le richieste: ogni volta che viene notificato un aggiornamento da parte del sensore, se questo tempo non è trascorso dall'ultima richiesta, allora la richiesta non viene inviata ma viene comunque ricalcolata la nuova media.
